@@ -12,7 +12,7 @@ st.markdown("## 🛡️ FloodLink NYC: Strategic Flood Forecast")
 st.markdown("##### Powered by SARIMAX")
 
 # --- 2. DATA GENERATION (The "Fuel" Logic) ---
-start_date = date(2026, 1, 12)
+start_date = date(2026, 1, 1)
 end_date = date(2026, 4, 30)
 dates = pd.date_range(start=start_date, end=end_date, freq='D')
 
@@ -109,6 +109,7 @@ with col2:
     
     st_folium(m, width=500, height=450, key="map")
     st.caption("Site: Stapleton SIR Station Neighborhood (1-mile impact radius)")
+
 
 
 
