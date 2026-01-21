@@ -5,11 +5,11 @@ from streamlit_folium import st_folium
 from datetime import date, datetime
 
 # --- 1. SETUP ---
-st.set_page_config(page_title="FloodLink NYC | VaporGuard", layout="wide")
+st.set_page_config(page_title="FloodLink NYC (2026)", layout="wide")
 
-# Professional Title Branding
+# Title
 st.markdown("## 🛡️ FloodLink NYC: Strategic Flood Forecast")
-st.markdown("##### Powered by VaporGuard SARIMAX 'Ultra-Vision'")
+st.markdown("##### Powered by SARIMAX")
 
 # --- 2. DATA GENERATION (The "Fuel" Logic) ---
 start_date = date(2026, 1, 12)
@@ -49,10 +49,9 @@ with st.sidebar:
     )
     
     st.divider()
-    # This keeps your "Titanosaur" story visible for the judges
     st.markdown("### 🦕 Methodology")
     st.info("""
-    **VaporGuard Ultra-Vision:**
+    **FloodLink NYC:**
     Our SARIMAX model uses **Total Column Water Vapor (TCWV)** as the primary 'fuel' factor. 
     
     By tracking this invisible variable, we identify flood risks **10 days** before the first raindrop falls.
@@ -67,7 +66,7 @@ vapor_val = result['Water_Vapor_TCWV'].values[0]
 col1, col2 = st.columns([1.2, 1], gap="large")
 
 with col1:
-    # Top Row: Show the 'Fuel' vs the 'Result'
+    # Top Row: the 'Fuel' vs the 'Result'
     m_col1, m_col2 = st.columns(2)
     m_col1.metric(label="Atmospheric Fuel (Vapor)", value=f"{vapor_val:.1f} kg/m²")
     m_col2.metric(label="Predicted Saturation", value=f"{rain_val:.1f} mm")
@@ -107,3 +106,4 @@ with col2:
     
     st_folium(m, width=500, height=450, key="map")
     st.caption("Site: Stapleton SIR Station Neighborhood (1-mile impact radius)")
+
