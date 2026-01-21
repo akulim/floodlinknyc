@@ -55,7 +55,7 @@ with st.sidebar:
     
     st.divider()
     st.markdown("### 🦕 Methodology")
-    st.info("*Our SARIMAX model uses **Total Column Water Vapor (TCWV)** as the primary 'fuel' factor. 
+    st.info("""*Our SARIMAX model uses **Total Column Water Vapor (TCWV)** as the primary 'fuel' factor. 
             \nBy tracking this invisible variable, we identify flood risks **10 days** before the first raindrop falls.
             """)
 
@@ -101,4 +101,5 @@ if not result.empty:
         st_folium(m, width=500, height=450, key="map")
 else:
     st.error("Date selected is outside of our forecast range (Jan 1 - Apr 30).")
+
 
