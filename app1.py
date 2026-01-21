@@ -6,31 +6,32 @@ from datetime import date, datetime
 
 # --- 1. SETUP ---
 st.set_page_config(page_title="FloodLink NYC | VaporGuard", layout="wide")
-st.title("🛡️ FloodLink NYC: Strategic Flood Forecast")
 
-# --- 2. DATA GENERATION (Updated to Jan 1st) ---
-start_date = date(2026, 1, 1) # Changed from Jan 12 to Jan 1
-end_date = date(2026, 4, 30)
-dates = pd.date_range(start=start_date, end=end_date, freq='D')
+# --- 2. DATA GENERATION (Fixed Range: Jan 1 to Apr 30) ---
+# We define the range clearly so the app never "searches" for a missing date
+start_range = date(2026, 1, 1)
+end_range = date(2026, 4, 30)
+dates = pd.date_range(start=start_range, end=end_range, freq='D')
 
 data_rain = []
 data_vapor = [] 
 
 for d in dates:
-    # Logic for Jan 6-7 Flood Proof
+    # 1. Past Proof: Jan 6-7 Flood
     if (d.month == 1 and 6 <= d.day <= 7):
-        data_rain.append(38.5) # Above 35mm threshold
-        data_vapor.append(50.0)
-    # Logic for Spring Peaks
+        data_rain.append(38.5) 
+        data_vapor.append(52.0)
+    # 2. Future Peaks: Mid-March and Late-April
     elif (d.month == 3 and 14 <= d.day <= 17) or (d.month == 4 and 20 <= d.day <= 23):
         data_rain.append(41.5 if d.month == 3 else 38.2)
-        data_vapor.append(55.0) 
+        data_vapor.append(58.0) 
+    # 3. Baseline Weather
     elif d.month >= 3:
-        data_rain.append(18.0 + (d.day % 10))
-        data_vapor.append(30.0 + (d.day % 5))
+        data_rain.append(18.0 + (d.day % 8))
+        data_vapor.append(28.0 + (d.day % 4))
     else:
         data_rain.append(12.0 + (d.day % 5))
-        data_vapor.append(22.0 + (d.day % 3))
+        data_vapor.append(20.0 + (d.day % 3))
 
 df_forecast = pd.DataFrame({
     'Date': dates, 
@@ -39,27 +40,62 @@ df_forecast = pd.DataFrame({
 })
 df_forecast['Date_Only'] = df_forecast['Date'].dt.date
 
-# --- 3. SIDEBAR: UPDATED CALENDAR ---
+# --- 3. SIDEBAR ---
 with st.sidebar:
     st.header("🗓️ Forecast Calendar")
     
-    # Set the default to today, but allow scrolling back to Jan 1st
+    # We set 'value' to today's date. 
+    # If today is Jan 20, it will open on Jan 20.
     selected_date = st.date_input(
         "Select a date to inspect:",
-        value=date.today(),          # Opens on Today's date
-        min_value=date(2026, 1, 1),  # User can now go back to Jan 1
-        max_value=end_date
+        value=date.today(),          
+        min_value=start_range, 
+        max_value=end_range
     )
     
     st.divider()
     st.markdown("### 🦕 Methodology")
-    st.info("**VaporGuard Ultra-Vision:** Using TCWV as the 'fuel' to see floods 10 days early.")
+    st.info("**VaporGuard Ultra-Vision:** Using TCWV as the 'fuel' factor to see floods 10 days early.")
 
-# --- 4. PREDICTION LOGIC ---
+# --- 4. DATA LOOKUP (The fix for the 'Nothing' error) ---
 result = df_forecast[df_forecast['Date_Only'] == selected_date]
-# Safety check in case a date is picked outside the range
+
 if not result.empty:
     rain_val = result['Predicted_Precip'].values[0]
     vapor_val = result['Water_Vapor_TCWV'].values[0]
+    
+    # --- 5. DASHBOARD DISPLAY ---
+    st.markdown(f"## 🛡️ FloodLink NYC: Forecast for {selected_date}")
+    
+    col1, col2 = st.columns([1.2, 1], gap="large")
+
+    with col1:
+        m_col1, m_col2 = st.columns(2)
+        m_col1.metric(label="Atmospheric Fuel (Vapor)", value=f"{vapor_val:.1f} kg/m²")
+        m_col2.metric(label="Predicted Saturation", value=f"{rain_val:.1f} mm")
+
+        if rain_val >= 35:
+            st.error(f"### 🚨 CRITICAL FLOOD ALERT")
+        elif rain_val >= 22:
+            st.warning(f"### ⚠️ ELEVATED WARNING")
+        else:
+            st.success(f"### ✅ STABLE / LOW RISK")
+
+        df_chart = df_forecast.set_index('Date')[['Predicted_Precip']]
+        df_chart['Danger_Line'] = 35.0
+        st.line_chart(df_chart, color=["#29b5e8", "#ff0000"]) 
+
+    with col2:
+        map_color = "red" if rain_val >= 35 else "orange" if rain_val >= 22 else "green"
+        m = folium.Map(location=[40.6267, -74.0755], zoom_start=14, tiles="cartodbpositron")
+        folium.Circle(
+            location=[40.6267, -74.0755],
+            radius=900,
+            color=map_color,
+            fill=True,
+            fill_color=map_color,
+            fill_opacity=0.4
+        ).add_to(m)
+        st_folium(m, width=500, height=450, key="map")
 else:
-    rain_val, vapor_val = 0, 0
+    st.error("Date selected is outside of our forecast range (Jan 1 - Apr 30).")
