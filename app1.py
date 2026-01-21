@@ -39,22 +39,27 @@ df_forecast = pd.DataFrame({
 df_forecast['Date_Only'] = df_forecast['Date'].dt.date
 
 # --- 3. SIDEBAR: THE CALENDAR & METHODOLOGY ---
+# --- 3. SIDEBAR: THE CALENDAR & METHODOLOGY ---
 with st.sidebar:
     st.header("🗓️ Forecast Calendar")
+    
+    # Get today's actual date
+    today = date.today() 
+    
+    # Set the calendar to show today's date by default
+    # But allow them to look back as far as Jan 12
     selected_date = st.date_input(
         "Select a date to inspect:",
-        value=start_date,
-        min_value=start_date,
-        max_value=end_date
+        value=today,             # Default is now Jan 20, 2026
+        min_value=date(2026, 1, 12), # They can still scroll back to the start
+        max_value=end_date       # They can look forward to April
     )
     
     st.divider()
     st.markdown("### 🦕 Methodology")
     st.info("""
-    **FloodLink NYC:**
+    **VaporGuard Ultra-Vision:**
     Our SARIMAX model uses **Total Column Water Vapor (TCWV)** as the primary 'fuel' factor. 
-    
-    By tracking this invisible variable, we identify flood risks **10 days** before the first raindrop falls.
     """)
 
 # --- 4. PREDICTION LOGIC ---
@@ -106,4 +111,5 @@ with col2:
     
     st_folium(m, width=500, height=450, key="map")
     st.caption("Site: Stapleton SIR Station Neighborhood (1-mile impact radius)")
+
 
