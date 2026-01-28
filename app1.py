@@ -4,10 +4,10 @@ import folium
 from streamlit_folium import st_folium
 from datetime import date, datetime
 
-# --- 1. SETUP ---
+# --- SETUP ---
 st.set_page_config(page_title="FloodLink NYC (LEAP Urban Futures 2026)", layout="wide")
 
-# --- 2. DATA GENERATION (Fixed Range: Jan 1 to Apr 30) ---
+# --- DATA (Range: Jan 1 to Apr 30) ---
 # We define the range clearly so the app never "searches" for a missing date
 start_range = date(2026, 1, 1)
 end_range = date(2026, 4, 30)
@@ -59,7 +59,7 @@ with st.sidebar:
             \nBy tracking this invisible variable, we identify flood risks **10 days** before the first raindrop falls.
             """)
 
-# --- 4. DATA LOOKUP (The fix for the 'Nothing' error) ---
+# --- 4. DATA LOOKUP ---
 result = df_forecast[df_forecast['Date_Only'] == selected_date]
 
 if not result.empty:
@@ -101,6 +101,7 @@ if not result.empty:
         st_folium(m, width=500, height=450, key="map")
 else:
     st.error("Date selected is outside of our forecast range (Jan 1 - Apr 30).")
+
 
 
 
