@@ -41,14 +41,21 @@ df_forecast = pd.DataFrame({
 df_forecast['Date_Only'] = df_forecast['Date'].dt.date
 
 # --- 3. SIDEBAR ---
+# --- 3. SIDEBAR WITH ERROR HANDLING ---
 with st.sidebar:
     st.header("🗓️ Forecast Calendar")
     
-    # We set 'value' to today's date. 
-    # If today is Jan 20, it will open on Jan 20.
+    # 1. Smart Default Date Logic
+    today = date.today()
+    if start_range <= today <= end_range:
+        default_date = today
+    else:
+        default_date = start_range  # Fallback to Jan 1, 2026 if today is outside Jan-Apr
+    
+    # 2. Date Input Widget
     selected_date = st.date_input(
         "Select a date to inspect:",
-        value=date.today(),          
+        value=default_date,          
         min_value=start_range, 
         max_value=end_range
     )
