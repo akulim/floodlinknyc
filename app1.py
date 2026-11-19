@@ -96,7 +96,7 @@ if not result.empty:
 
     with col2:
         map_color = "red" if rain_val >= 35 else "orange" if rain_val >= 22 else "green"
-        m = folium.Map(location=[40.6267, -74.0755], zoom_start=14, tiles="cartodbpositron")
+        m = folium.Map(location=[40.6267, -74.0755], zoom_start=14, tiles="OpenStreetMap")
         folium.Circle(
             location=[40.6267, -74.0755],
             radius=900,
